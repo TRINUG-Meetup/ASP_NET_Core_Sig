@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ChoreApp;
+using SimpleAspNetCore.Models;
 
 namespace SimpleAspNetCore.Controllers
 {
@@ -17,7 +18,7 @@ namespace SimpleAspNetCore.Controllers
         }
         public IActionResult Index()
         {
-            ViewData["users"] = Repo.GetAllUsers();
+            ViewData["users"] = Repo.GetAllUsers().Select(user => new UserViewModel { Name = user.Name }).ToList();
             return View();
         }
 

@@ -1,6 +1,7 @@
 ﻿using ChoreApp;
 using ChoreApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using SimpleAspNetCore.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +9,6 @@ using System.Threading.Tasks;
 
 namespace SimpleAspNetCore.Controllers
 {
-    public class UserViewModel
-    {
-        public UserViewModel() { }
-        
-        public string Name { get; set; }
-    }
     public class UserController
     {
         private readonly ChoreRepository Repo;

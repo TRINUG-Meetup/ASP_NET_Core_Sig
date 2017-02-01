@@ -3,7 +3,7 @@
 }
 
 <ul>
-@foreach (var u in (List<ChoreApp.Models.User>)ViewData["users"])
+@foreach (var u in (List<SimpleAspNetCore.Models.UserViewModel>)ViewData["users"])
 {
     <li>@u.Name</li>
 }
