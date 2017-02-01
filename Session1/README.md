@@ -75,3 +75,22 @@ When you utilize the dotnet command-line by default you will use the latest SDK 
 ```
 
 What happens when run the dotnet command is it will look in the current directory for a global.json. If it cannot find one, it'll look in the parent directory for global.json, and then that parent, etc. until it reaches the root of the drive. If it finds a global.json, it will use the sdk/version setting and try and locate that in the C:\Program Files\dotnet\sdk folder. If it locates that sdk, it will use that SDK. This allows you install multiple SDKs on a single system but still decide which SDK is used for which project.
+
+NET Standard
+------------
+At this point there are multiple .NET runtimes: Full .NET Framework (e.g. the original), .NET Core (cross platform to Windows, Mac, Linux), Xamarin runtime for supporting Android/iOs, Mono runtime for supporting Linux, UWP Runtime (for Universal Windows Apps), Unity runtime for targeting devices that Unity game engine supports, etc.
+
+If building a library these runtimes were typically supported either by creating multiple assemblies for the multiple runtimes or by creating portable class libraries that were portable across multiple runtimes.
+
+There is a new effort to make supporting multiple runtimes easier, .NET Standard. .NET Standard is a specification, e.g. a document and some associated shim assemblies. Each runtime will then support certain versions of .NET Standard. So, now you can target a given .NET Standard, compile once and your compiled assembly will work on any runtime that supports that version of .NET Standard.
+
+You can find more details here:
+https://github.com/dotnet/standard
+
+To see the actual spec, e.g. the APIs available in a given version of .NET Standard, you can go the respective page:
+  * https://github.com/dotnet/standard/blob/master/docs/versions/netstandard1.0_ref.md
+  * https://github.com/dotnet/standard/blob/master/docs/versions/netstandard1.4_ref.md
+  
+By remember, .NET Standard is only a spec. A given runtime, e.g. .NET Core or Full Framework actually decides if it implements the spec or not. You don't have to target the spec, you can still target a particular runtime.
+
+Further details can also be found at: https://docs.microsoft.com/en-us/dotnet/articles/core/tutorials/libraries
