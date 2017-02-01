@@ -28,3 +28,16 @@ dotnet new --help
 ```
 
 For complete documentation on the dotnet command-line, go to: https://docs.microsoft.com/en-us/dotnet/articles/core/
+
+To create a sample web application, do the following on the command-line:
+```
+mkdir WebTest
+cd WebTest
+dotnet new -t Web
+dotnet restore
+dotnet run
+```
+
+Then open a web browser and go to http://localhost:5000/ to see the web app running.
+
+For documentation on ASP.Net itself, see: https://docs.microsoft.com/en-us/aspnet/core/
