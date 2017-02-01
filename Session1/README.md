@@ -1,6 +1,6 @@
-This is a File -> New Project... in Visual Studio 2015 (specifically a .NET Core Web App, using the Web App template, No Auth, No Azure)
+This is a File -> New Project... in Visual Studio 2015 (specifically a .NET Core Web App, using the Web App template, No Auth, No Azure). Or you can create a new directory, cd into it and then dotnet -new -t Web on the command-line to create an new web project.
 
-After that, I dropped in ChoreRepository.cs
+After that, I dropped in ChoreRepository.cs, you can download it from this repository.
 
 I modified Startup.cs, adding .AddSingleton line as shown below:
 ```
@@ -10,7 +10,23 @@ I modified Startup.cs, adding .AddSingleton line as shown below:
 	services.AddSingleton<ChoreApp.ChoreRepository, ChoreApp.ChoreRepository>(); //added this line
     }
 ```	
-I then modified the HomeController.cs, relevant changes below:
+
+I then created a new model, specifically this is a MVC model. The ChoreRepository contains a model, but that would be considered a data access layer model, not the model for MVC (Model-View-Controller). Create a Models/ folder and create a new .cs file called UserViewModel.cs with the following content:
+```
+using System;
+
+namespace SimpleAspNetCore.Models
+{
+    public class UserViewModel
+    {
+        public UserViewModel() { }
+
+        public string Name { get; set; }
+    }
+}
+```
+
+We now want to query the repository for any users and display them on the main page. First, we must update the controller part of MVC, in this case HomeController.cs, see relevant changes below, notice this converts from the data access model to the model we just created for the MVC layer of the app:
 ```
 	public ChoreRepository Repo { get; private set; }
 
@@ -20,19 +36,19 @@ I then modified the HomeController.cs, relevant changes below:
 	}
 	public IActionResult Index()
 	{
-		ViewData["users"] = Repo.GetAllUsers();
+		ViewData["users"] = Repo.GetAllUsers().Select(user => new UserViewModel { Name = user.Name }).ToList();
 		return View();
 	}
 ```
 
-I then modified Views/Home/Index.html, I deleted the content in the file and then added the following:
+We now need to update the View part of MVC, open up Views/Home/Index.html. Delete the content in the file and then add the following:
 ```
 @{
-   ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home Page";
 }
 
 <ul>
-@foreach (var u in (List<ChoreApp.Models.User>)ViewData["users"])
+@foreach (var u in (List<SimpleAspNetCore.Models.UserViewModel>)ViewData["users"])
 {
     <li>@u.Name</li>
 }
@@ -50,12 +66,6 @@ I then created a UserController.cs with the following content:
 ```
 namespace SimpleAspNetCore.Controllers
 {
-    public class UserViewModel
-    {
-        public UserViewModel() { }
-        
-        public string Name { get; set; }
-    }
     public class UserController
     {
         private readonly ChoreRepository Repo;
@@ -74,8 +84,6 @@ namespace SimpleAspNetCore.Controllers
     }
 }
 ```
-The reason for UserViewModel is that the ChoreRepository works with a User class that is immutable by default and MVC cannot bind to that immutable class so a view model specific class must be created.
-
 Now if you run the app, you can type in a new user name, click Add and it appears immediately in the UI.
 
 If the app is stopped and started, only John and Mary will appear, the persistence is currently in-memory only.
@@ -92,11 +100,25 @@ The ChoreRepository.cs contains a total of 9 classes:
  * ChoreApp.Models.User
  * ChoreApp.Models.CompletedChore
  * ChoreApp.ChoreRepository
-	
+ 
 This repository works on dotNet Core and has been tested on Linux. As noted it works in-memory, can optionally persist and does not require a database. It is also thread-safe.
 It tracks Users, Chores for those Users and then completion of those chores, displaying current assignments and completions for the current week.
 
+The ChoreRepository has the following potentially useful methods:
+ * List<User> GetAllUsers();
+ * List<Chore> GetAllChores();
+ * List<AssignmentSummary> GetChildAssignmentsThisWeek(int userId);
+ * User GetUser(int id);
+ * Chore GetChore(int id);
+ * void AddUser(User value);
+ * void EditUser(int id, User value);
+ * void DeleteUser(int id);
+ * void AddChore(Chore value);
+ * void EditChore(int id, Chore Value);
+ * void DeleteChore(int id);
+ * void CompleteChore(CompleteChorePayload data);
+ * void ClearChoreCompletion(CompleteChorePayload data);
+ 
+	
 As we go farther into the SIG series, we can append logging, mocking, proper dependency injection, replace the ChoreRepository with one that uses EF core, etc.
 Since this repository already works on Linux, examples on Linux and with docker containers would be easy to demo as well.
-
-Everything is placed in a single .cs file, so that attendees of the SIG can replicate all the steps listed above easily, without having to manage and place 9 .cs files.
