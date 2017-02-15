@@ -195,4 +195,31 @@ The Docker Hub image name is 'kstreith/simple-aspnetcore:session1'. Once the App
 
 ## What about Windows containers?
 
+I have created Windows container versions of the Hello, World console app and our sample ASP.Net Core app from Session1. First, you must switch Docker over to running Windows containers. Right-click on the Docker icon in the system tray and select "Switch to Windows containers..." in the menu. Once Docker has switch over, you can use the same command prompt you were using before.
+
+Let's run our hello world image using:
+
+```
+docker run kstreith/hello-dotnet-nanoserver
+```
+
+You should see the Hello, World message.
+
+Let's run our sample ASP.Net Core app from last session using:
+
+```
+docker run -d kstreith/simple-aspnetcore:session1-nanoserver
+```
+
+Notice I didn't use -p to map ports that because currently this feature is waiting on updates to the Windows OS networking stack that is still forthcoming. You need to query Docker to get the internal ip address the container is running under, do that using:
+
+```
+docker inspect --format '{{ .NetworkSettings.Networks.nat.IPAddress }}' [container id/container name]
+```
+
+This will give you the ip address the container is using, then open the browser to http://[ip]:5000/
+
+This limitation in the Windows network stack will be addressed in a future Windows release.
+
+I created those images using the Dockerfile.windows you find in the Session1/ and Session2/ folder. If you compare with the Dockfile for Linux the only difference is the base image referenced in the FROM command in the Dockerfile, otherwise it is the same Dockerfile.
 
