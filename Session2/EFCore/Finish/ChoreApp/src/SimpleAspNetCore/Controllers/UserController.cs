@@ -1,11 +1,6 @@
-﻿using ChoreApp;
-using ChoreApp.Models;
+﻿using ChoreApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using SimpleAspNetCore.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ChoreApp.Contracts;
 
 namespace SimpleAspNetCore.Controllers
@@ -22,7 +17,7 @@ namespace SimpleAspNetCore.Controllers
         [HttpPost]
         public IActionResult Add(UserViewModel user)
         {
-            Repo.AddUser(new ChoreApp.Models.User(-1, user.Name));
+            Repo.AddUser(new User {Name = user.Name});
             return new RedirectToActionResult("Index", "Home", null);
         }
     }
