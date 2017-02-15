@@ -1,6 +1,9 @@
 # EF Core
 We are going to pick up from the last session and work with the `ChoreRepository.cs` file and add database support through `EF Core`. The following walk through is a step-by-step guide for accomplishing this. It does not cover all aspects of `EF Core`, but should provide a good starting point and foundation for working with it.
 
+My primary source for this session came from the [EF Core docs](https://docs.microsoft.com/en-us/ef/core/) and the [EF Core Tutorial](https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/intro) for ASP.NET Core.
+
+## Prelude
 The ChoreRepository did an excellent job of outlining the models and behavior needed for the ChoreApp, and now is the time to start moving the project to forward.  One of the primary strength of MVC is how it lends itself to separating concerns. We could have one project and dump everything into it, but that's no fun. The **Start** folder contains a refactored version of the SimpleAspNetCore application to help get things started for this session. The primary changes other than moving the classes to individual files is the domain models are moved into its own project. Below is an outline of the changes that were made. 
 
 1. Solution renamed to ChoreApp because it will be containing more than just the SimpleAspNetCore project.
@@ -16,9 +19,9 @@ The SimpleAspNetCore project have the following changes
 1. Reference to ChoreApp library project was added.
 2. ChoreRepository class was renamed to ChoreRepositoryStub and inherits from IChoreRepository.
 3. Startup changes
-   1. DI changed to use IChoreRepository
+    1. DI changed to use IChoreRepository
 4. Controller changes
-   1. Change ChoreRepository to use IChoreRepository
+    1. Changed ChoreRepository to use IChoreRepository
 
 
 ## Adding EF Core project
