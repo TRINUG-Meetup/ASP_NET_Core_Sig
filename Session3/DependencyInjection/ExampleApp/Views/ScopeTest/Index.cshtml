@@ -1,0 +1,8 @@
+@inject MvcApp.Services.IInstanceService InstanceService;
+<br />
+<div>
+    View Injected InstanceId: @InstanceService.GetInstanceId()
+</div>
+<div>
+    Controller Injected InstanceId: @ViewData["InstanceId"]
+</div>
