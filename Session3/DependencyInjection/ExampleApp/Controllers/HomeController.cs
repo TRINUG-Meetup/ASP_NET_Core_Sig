@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace MvcApp.Controllers
 {
@@ -26,6 +22,8 @@ namespace MvcApp.Controllers
 
             return View();
         }
+
+        
 
         public IActionResult Error()
         {
