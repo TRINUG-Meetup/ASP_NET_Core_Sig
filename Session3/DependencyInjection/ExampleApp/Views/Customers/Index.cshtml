@@ -1,0 +1,9 @@
+@model IEnumerable<Customer>
+@using ExampleApp.Repositories;
+
+<h2>Customers:</h2>
+<br/>
+@foreach (var customer in Model)
+{
+    <p>@customer.Name</p>
+}
