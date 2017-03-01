@@ -14,7 +14,10 @@ The content of the presentation is available for pull requests and comments at [
 ## Working with the example application
 
 Install .NET Core from [https://dot.net](https://dot.net).  Follow the instructions for your Operating System and editor choices.
-This example application was created with the latest LTS release of .NET Core and uses a .csproj file.  It is based off of the example web application created by the dotnet command line:
+
+**Note:** This example application was created with release candidate 3 of the .NET Core SDK and utilizes a .csproj file.  You will need to install rc3 or rc4 of the SDK to work with this project.  
+
+It is based off of the example web application created by the dotnet command line:
 ```
 dotnet new -t web
 ```

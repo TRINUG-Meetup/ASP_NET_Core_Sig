@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ExampleApp.Repositories
+namespace MvcApp.Repositories
 {
     public class Customer
     {
