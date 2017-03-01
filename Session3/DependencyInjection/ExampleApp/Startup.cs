@@ -32,7 +32,7 @@ namespace MvcApp
 
             services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-            services.AddScoped<IInstanceService, InstanceService>();
+            services.AddTransient<IInstanceService, InstanceService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
