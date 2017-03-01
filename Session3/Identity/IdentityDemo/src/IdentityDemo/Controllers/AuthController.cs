@@ -79,7 +79,7 @@ namespace IdentityDemo.Controllers
                         // Get Existing User Claims
                         var userClaims = await _userManager.GetClaimsAsync(user);
 
-                        // Add Claims from WidgetUser
+                        // Add Claims from ApplicationUser
                         var claims = new List<Claim>
                         {
                             new Claim(JwtRegisteredClaimNames.Sub, user.UserName),

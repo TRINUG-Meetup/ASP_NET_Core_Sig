@@ -55,9 +55,9 @@ namespace IdentityDemo.Membership
             }
 
             var users = await _userManager.Users.ToListAsync();
-            foreach (var widgetUser in users)
+            foreach (var applicationUser in users)
             {
-                await _userManager.DeleteAsync(widgetUser);
+                await _userManager.DeleteAsync(applicationUser);
             }
         }
 

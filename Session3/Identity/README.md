@@ -175,9 +175,9 @@ namespace IdentityDemo.Membership
             }
 
             var users = await _userManager.Users.ToListAsync();
-            foreach (var widgetUser in users)
+            foreach (var applicationUser in users)
             {
-                await _userManager.DeleteAsync(widgetUser);
+                await _userManager.DeleteAsync(applicationUser);
             }
         }
 
@@ -413,7 +413,7 @@ public async Task<IActionResult> CreateToken([FromBody]Credentials credentials)
                 // Get Existing User Claims
                 var userClaims = await _userManager.GetClaimsAsync(user);
 
-                // Add Claims from WidgetUser
+                // Add Claims from ApplicationUser
                 var claims = new List<Claim>
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
