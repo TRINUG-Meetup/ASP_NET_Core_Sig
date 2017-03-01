@@ -30,7 +30,6 @@ Open the folder or project in your favorite editor.
 Restore packages
 ```
 dotnet restore
-dotnet run
 ```
 
 ### Simple Registration Example
