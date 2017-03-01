@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ExampleApp.Repositories;
+using MvcApp.Repositories;
 using MvcApp.Services;
-using Scrutor;
-using MvcApp.Controllers;
 
 namespace MvcApp
 {

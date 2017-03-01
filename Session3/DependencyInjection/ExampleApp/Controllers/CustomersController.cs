@@ -1,4 +1,4 @@
-using ExampleApp.Repositories;
+using MvcApp.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MvcApp.Controllers
