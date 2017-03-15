@@ -27,6 +27,11 @@ namespace WebApp.Controllers
             return View();
         }
 
+        public IActionResult ThrowEx()
+        {
+            throw new InvalidOperationException("This should never be called, except during a demo");
+        }
+
         public IActionResult Error()
         {
             return View();
