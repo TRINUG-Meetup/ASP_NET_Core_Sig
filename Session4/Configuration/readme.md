@@ -89,37 +89,166 @@ Now, you may be wondering about configuration setting values at this point. Wher
 
 So, as you see the configuration is really done in application code, mostly in Startup.cs. But since it's code it can defer to anywhere else really to get values. As an aside the code can be organized as well, it **doesn't have to be a 2000 line Startup.cs file**.
 
+So, the ASP.NET Core team wrote a configuration library, specifically "Microsoft.Extensions.Configuration" nuget package. You could use it any .NET application. You get an IConfiguration interface or an IConfigurationRoot interface. Your create an instance of that interface using the ConfigurationBuilder instance. You then add any number of configuration sources to the builder and then call .Build() to get back an instance of IConfigurationRoot which could then be down cast to IConfiguration.
+
+Let's look at the simplest possible example of a working configuration. Replace the code in the Startup.cs constructor to be the following:
+
+```
+    var hardCodedConfig = new Dictionary<string, string> {
+        { "SampleKey", "Value assigned in-memory in Startup.cs" },
+        { "SampleSection:NestedKey", "NestedKey value for SampleSection assigned in-memory in Startup.cs" }
+    };
+    var builder = new ConfigurationBuilder()
+        .AddInMemoryCollection(hardCodedConfig);
+    Configuration = builder.Build();
+```
+
+You can see that I add an in-memory configuration source and provided initial data from a Dictionary.
+
+Now, if you look in the ConfigureServices method, I register the Configuration instance into the built-in dependency injection container for any code that requests an IConfiguration interface, specifically this line in ConfigureServices method:
+
+```
+    services.AddSingleton<IConfiguration>(Configuration);
+```
+
+Now if you look at HomeController.cs in the Controllers folder, you will see the constructor takes an IConfiguration constructor argument. That is then stored on the class and referenced in the Index controller action method which is how you see the value when running the web application. If you run the web application, you will now the values on the home page.
+
+So, looking at HomeController.cs, IConfiguration is pretty close to what we had before in legacy ASP.NET with ConfigurationManager.AppSettings["SampleKey"]. However, now we are using an interface and have an implementation injected instead of using static variables.
+
+Now, going back to Startup.cs, the nice part is that we can add lots of configuration sources, including custom code. So, let's now add environment variables. Update the Startup.cs constructor to look like this:
+
+```
+    var hardCodedConfig = new Dictionary<string, string> {
+        { "SampleKey", "Value assigned in-memory in Startup.cs" },
+        { "SampleSection:NestedKey", "NestedKey value for SampleSection assigned in-memory in Startup.cs" }
+    };
+    var builder = new ConfigurationBuilder()
+        .AddInMemoryCollection(hardCodedConfig)
+        .AddEnvironmentVariables();
+    Configuration = builder.Build();
+```
+
+All I changed was adding the .AddEnvironmentVariables() line. Now you should be able to update the launch configuration and add a SAMPLEKEY environment variable. Now if you run the app you will see the environment variable value win over the hard-coded value. That is because of the order we used for the configuration sources, .AddInMemoryCollection is first, followed by .AddEnvironmentVariables. If you wanted to set the nested key as an environment variable, the name of the variable would be, SAMPLESECTION:NESTEDKEY. The environment variable names are case-insensitive.
+
+There are a number of provided configuration sources provided by Microsoft, plus you can write your own configuration source. Let's look at adding a json file as a configuration source. Modify the Startup.cs constructor to look like:
+
+```
+    var hardCodedConfig = new Dictionary<string, string> {
+        { "SampleKey", "Value assigned in-memory in Startup.cs" },
+        { "SampleSection:NestedKey", "NestedKey value for SampleSection assigned in-memory in Startup.cs" }
+    };
+    var builder = new ConfigurationBuilder()
+        .SetBasePath(env.ContentRootPath)
+        .AddInMemoryCollection(hardCodedConfig)
+        .AddJsonFile("appsettings.json")
+        .AddEnvironmentVariables();
+    Configuration = builder.Build();
+```                
+
+Remove the previously set environment variables and create an appsettings.json in the same directory as Startup.cs with the following content:
+
+```
+{
+  "SampleKey": "Sample value from JSON file",
+  "SampleSection": {
+    "NestedKey":  "Also from JSON file"
+  }
+}
+```
+
+If you look at the code change to Startup.cs, we made two changes, the call to SetBasePath(env.ContentRootPath) and the .AddJsonFile("appsettings.json").  The SetBasePath is used so that the ConfigurationBuilder knows where on the filesystem to look for files. The AddJsonFile obviously adds the appsettings.json as a configuration source. Run the application now and you should see the values from the JSON file. You can also override those as environment variables in the launchSettings.json, again because of the order we have specified for the configuration sources.
+
+Now, let's talk about settings for each different environment. Let's modify the Startup.cs as shown below:
+
+```
+    var hardCodedConfig = new Dictionary<string, string> {
+        { "SampleKey", "Value assigned in-memory in Startup.cs" },
+        { "SampleSection:NestedKey", "NestedKey value for SampleSection assigned in-memory in Startup.cs" }
+    };
+    var builder = new ConfigurationBuilder()
+        .SetBasePath(env.ContentRootPath)
+        .AddInMemoryCollection(hardCodedConfig)
+        .AddJsonFile("appsettings.json")
+        .AddJsonFile($"appsettings.{env.EnvironmentName}.json")
+        .AddEnvironmentVariables();
+    Configuration = builder.Build();
+```
+
+and create an appsettings.Development.json in the same directory as Startup.cs with the following content:
+
+```
+{
+  "SampleKey": "Development value from JSON file"
+}
+```
+
+The only change we made this time was adding a .AddJsonFile($"appsettings.{env.EnvironmentName}.json") line to the configuration. This now means we will read from a file like appsettings.Development.json or appsettings.Production.json depending on the environment. And this is done **after** we read from appsettings.json. If the file doesn't exist that is fine, no error is thrown.
+
 Secrets
 -------
+Now what about secrets such as passwords or connection strings? We could just reference a secrets.json and then make sure we don't check it into source control. This is the general approach that most teams took with legacy ASP.NET. The concern is that the file is on the filesystem and could accidentally be checked into source control. For developers, Microsoft has written a configuration source for user secrets. To enable it, you need to update the .csproj to add three lines:
+
+```
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.1.1" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />    
+  </ItemGroup>
+  <PropertyGroup>
+    <!-- put your own secret in here -->
+    <UserSecretsId>TrinugSampleApp-2679ad45-f497-440f-9ad3-fed98ab1199d</UserSecretsId>  
+  </PropertyGroup>
+```
+
+This adds a nuget package reference which is the User Secrets configuration source.  We also a command line tool for the dotnet command-line. Lastly, we need to configure a unique ID for this secrets configuration source. This can be anything, but is typically a Guid.
+
+You should then make your Startup.cs constructor look like:
+
+```
+    var hardCodedConfig = new Dictionary<string, string> {
+        { "SampleKey", "Value assigned in-memory in Startup.cs" },
+        { "SampleSection:NestedKey", "NestedKey value for SampleSection assigned in-memory in Startup.cs" }
+    };
+    var builder = new ConfigurationBuilder()
+        .SetBasePath(env.ContentRootPath)
+        .AddInMemoryCollection(hardCodedConfig)
+        .AddJsonFile("appsettings.json")
+        .AddJsonFile($"appsettings.{env.EnvironmentName}.json");
+    if (env.IsDevelopment())
+    {
+        builder.AddUserSecrets<Startup>();
+    }
+    builder.AddEnvironmentVariables();
+    Configuration = builder.Build();
+```            
+
+We added the builder.AddUserSecrets<Startup>() inside the if (env.IsDevelopment()). Now, if you run the application you won't notice any differences. That's because we don't have any secrets loaded into the user secrets store.
+
+Open a command prompt in the same directory as the .csproj file and you can now run:
+
+```
+dotnet user-secrets --help
+```
+
+To list all configured secrets use:
+```
+dotnet user-secrets list
+```
+
+You can set a value using
+```
+dotnet user-secrets set [key] [value]
+```
+
+Go ahead and use that to set a value for SampleKey using
+```
+dotnet user-secrets set SampleKey SuperSecretValue
+```
+
+Now, if you run the application you will see the value from the user secret store. We've configured the application in Startup.cs to only use this store if the application is in development mode. In production, you would likely set environment variables and the application will read configuration from environment variables last.
+
+If you want to know where the secrets are stored, they are stored clear-text in a file in your user directory. On Windows, this would be C:\Users\[user profile]\AppData\Roaming\Microsoft\UserSecrets\[userSecretsGuid]\secrets.json. The secrets are stored clear-text, but if you were using the secrets.json or secrets.config method in legacy ASP.NET, you were already storing secrets on the filesystem in clear text. The larger point here is that developers don't have a file containing secrets they might accidentally commit or copy around.
+
 
 Hosting Configuration
 ---------------------
-
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.1.1" />    
-
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />
-  </ItemGroup>  
-    
-   <UserSecretsId>TrinugSampleApp-2679ad45-f497-440f-9ad3-fed98ab1199d</UserSecretsId>
-    
-            if (env.IsDevelopment())
-            {
-                builder.AddUserSecrets<Startup>();
-            }
-    
-            //app.Use(async (context, next) =>
-            //{
-            //    //if (context.Request.Path.StartsWithSegments("/Home")) {
-            //    //    await next.Invoke();
-            //    //    return;
-            //    //}
-            //    await context.Response.WriteAsync("Hello, World! Custom middleware here!");
-            //});
-    
-            var builder = new ConfigurationBuilder().AddEnvironmentVariables("ASPNETCORE_");
-    
-                .UseUrls("http://localhost:8000")
-                .UseConfiguration(builder.Build())
-    
-```    
+TBD    
