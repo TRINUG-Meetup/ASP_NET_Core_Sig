@@ -169,7 +169,7 @@ Now, let's talk about settings for each different environment. Let's modify the 
         .SetBasePath(env.ContentRootPath)
         .AddInMemoryCollection(hardCodedConfig)
         .AddJsonFile("appsettings.json")
-        .AddJsonFile($"appsettings.{env.EnvironmentName}.json")
+        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
         .AddEnvironmentVariables();
     Configuration = builder.Build();
 ```
@@ -182,7 +182,7 @@ and create an appsettings.Development.json in the same directory as Startup.cs w
 }
 ```
 
-The only change we made this time was adding a .AddJsonFile($"appsettings.{env.EnvironmentName}.json") line to the configuration. This now means we will read from a file like appsettings.Development.json or appsettings.Production.json depending on the environment. And this is done **after** we read from appsettings.json. If the file doesn't exist that is fine, no error is thrown.
+The only change we made this time was adding a .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true) line to the configuration. This now means we will read from a file like appsettings.Development.json or appsettings.Production.json depending on the environment. And this is done **after** we read from appsettings.json. If the file doesn't exist that is fine, no error is thrown.
 
 Secrets
 -------
@@ -212,7 +212,7 @@ You should then make your Startup.cs constructor look like:
         .SetBasePath(env.ContentRootPath)
         .AddInMemoryCollection(hardCodedConfig)
         .AddJsonFile("appsettings.json")
-        .AddJsonFile($"appsettings.{env.EnvironmentName}.json");
+        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
     if (env.IsDevelopment())
     {
         builder.AddUserSecrets<Startup>();
@@ -251,4 +251,50 @@ If you want to know where the secrets are stored, they are stored clear-text in 
 
 Hosting Configuration
 ---------------------
-TBD    
+The last thing you might want to configure is the actual server, especially if you are running Kestrel directly. This might be the case when running inside a Docker container. By default, you configure the url for Kestrel using an environment variable, ASPNETCORE_URLS. For example on the command-line, you could do the following:
+
+```
+set ASPNETCORE_URLS=http://localhost:7004/
+dotnet run
+```
+    
+You can bind to multiple addresses and multiple ip addresses doing something like the following with an environment variable:
+
+```
+set ASPNETCORE_URLS=http://localhost:7004/,http://*:7006/
+dotnet run
+```
+
+By default Kestrel will bind to port 5000. If you want to change your application's default, you could update Program.cs to the following:
+
+```
+    var host = new WebHostBuilder()
+        .UseKestrel()
+        .UseUrls("http://localhost:8000/")
+        .UseContentRoot(Directory.GetCurrentDirectory())
+        .UseIISIntegration()
+        .UseStartup<Startup>()
+        .Build();
+
+    host.Run();
+```
+
+So, now the application by default would run on port 8000. The problem is that now the environment variable ASPNETCORE_URLS no longer works. In order to change the default bindings, you must create an IConfiguration and pass that to the WebHostBuilder. Using the IConfigurationBuilder you can then setup the configuration sources. Here is an example of setting the default url while still querying an override value from environment variables.
+
+```
+    var builder = new ConfigurationBuilder()
+        .AddEnvironmentVariables("ASPNETCORE_");
+    var config = builder.Build();
+    var host = new WebHostBuilder()
+        .UseKestrel()
+        .UseUrls("http://localhost:8000/")
+        .UseConfiguration(config)
+        .UseContentRoot(Directory.GetCurrentDirectory())
+        .UseIISIntegration()
+        .UseStartup<Startup>()
+        .Build();
+
+    host.Run();
+```
+
+So, now the default port is 8000, but it can still be overridden via ASPNETCORE_URLS environment variable. You could obviously add additional configuration sources, such as json file, etc. You find more details on host settings in the [official documentation](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/hosting).
