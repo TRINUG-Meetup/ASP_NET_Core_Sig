@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:1.0-sdk-projectjson-nanoserver
+FROM microsoft/dotnet:1.0-sdk-nanoserver
 WORKDIR /app
 
 COPY . .

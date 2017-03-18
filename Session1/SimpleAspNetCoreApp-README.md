@@ -1,4 +1,4 @@
-This is a File -> New Project... in Visual Studio 2015 (specifically a .NET Core Web App, using the Web App template, No Auth, No Azure). Or you can create a new directory, cd into it and then dotnet -new -t Web on the command-line to create an new web project.
+This is a File -> New Project... in Visual Studio 2017 (specifically a .NET Core Web App, using the Web App template, No Auth, No Azure). Or you can create a new directory, cd into it and then dotnet new mvc on the command-line to create an new web project.
 
 After that, I dropped in ChoreRepository.cs, you can download it from this repository.
 

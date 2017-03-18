@@ -5,19 +5,44 @@ This session assumes you have read the corresponding chapters of the book and ha
   - [Intermediate ASP.Net Core](https://mva.microsoft.com/en-US/training-courses/intermediate-aspnet-core-10-16964?l=Kvl35KmJD_4306218965)
   - [ASP.Net Core 1.0 Cross-Platform](https://mva.microsoft.com/en-US/training-courses/intermediate-aspnet-core-10-16964?l=Kvl35KmJD_4306218965)
 
+**This has been updated for Visual Studio 2017 and .NET Core Tooling 1.0 release**
+
 Hello, World
 ------------
 To start, you can use DotNet Core, which does not require Visual Studio to be installed.
 
-Go to http://dot.net/ and click on "Download", then click on ".Net Core". You can then click on the .NET Core 1.0.3 SDK - Installer, either the Windows x86 or Windows x64 link, depending on whether you are running Windows 32-bit or Windows 64-bit. Once downloaded, click to run the installer. This is all you will require.
+Go to http://dot.net/ and click on "Download", then click on ".Net Core". You can then click on the Windows (x64) Installer or Windows (x86) Installer. Once downloaded, click to run the installer. This is all you will require.
 
-If you want to use Visual Studio, scroll down and click on the "Windows" step by step instructions. This will prompt you to install Visual Studio 2015, then install Visual Studio 2015 Update 3, then download and install an extension for Visual Studio. That is a multiple hour process, I recommend just downloading the SDK installer and installing it.
+If you want to use Visual Studio, scroll down and click on the "Windows" step by step instructions. This will prompt you to install Visual Studio 2017. I think it's very useful to see that DotNet Core doesn't require Visual Studio, so I recommend just downloading the SDK installer and installing it.
+
+To verify your DotNetCore installation, execute the following on the command-line:
+```
+dotnet --info
+```
+
+If you downloaded the direct Windows installer, you will see the following output:
+```
+.NET Command Line Tools (1.0.1)
+
+Product Information:
+ Version:            1.0.1
+ Commit SHA-1 hash:  005db40cd1
+
+Runtime Environment:
+ OS Name:     Windows
+ OS Version:  10.0.14393
+ OS Platform: Windows
+ RID:         win10-x64
+ Base Path:   C:\Program Files\dotnet\sdk\1.0.1
+ ```
+
+ If you only installed Visual Studio 2017, you would see similiar output, but it would list 1.0.0 instead of 1.0.1.
 
 To create a new console app, do the following on the command-line:
 ```
 mkdir ConsoleTest
 cd ConsoleTest
-dotnet new
+dotnet new console
 dotnet restore
 dotnet run
 ```
@@ -37,7 +62,7 @@ To create a sample web application, do the following on the command-line:
 ```
 mkdir WebTest
 cd WebTest
-dotnet new -t Web
+dotnet new mvc
 dotnet restore
 dotnet run
 ```
@@ -50,26 +75,28 @@ At this point, you could switch over to the SimpleAspNetCoreApp-README.md to see
 
 Multiple versions of .Net Core, project.json and .csproj
 --------------------------------------------
-You can have multiple versions of the .Net Core SDK installed on the same machine. This was a problem with full .NET Framework, but is fully supported with .Net Core. On Windows if you want to see what versions you have installed, go to C:\Program Files\dotnet\sdk folder or C:\Program Files (x86)\dotnet\sdk folder. You will have a subfolder there for each version of the SDK that you have installed. I want to point out that the SDK also bundles the .Net Core runtime. The Runtime itself has both a long-term supported 1.0.X line and a newer 1.1.X line. The runtime is production quality. The SDK which is what contains the build system and commands like dotnet new, dotnet run is still in preview. That is why you see the words preview in the sdk/ folder even though the runtime itself is production quality.
+You can have multiple versions of the .Net Core SDK installed on the same machine. This was a problem with full .NET Framework, but is fully supported with .Net Core. On Windows if you want to see what versions you have installed, go to C:\Program Files\dotnet\sdk folder or C:\Program Files (x86)\dotnet\sdk folder. You will have a subfolder there for each version of the SDK that you have installed. I want to point out that the SDK also bundles the .Net Core runtime. The Runtime itself has both a long-term supported 1.0.X line and a newer 1.1.X line. The runtime is production quality. 
+
+If you see the words preview in the sdk/ folder, that means you have an older version when the build system was still being worked on. Please install a 1.0.0 or 1.0.1 version of the SDK, please see the beginning of this document.
 
 The sdks which contain the words, preview2 utilize project.json as the build system. This is what when you download the SDKs currently for .NET Core 1.0.3 or 1.1.0, or if you use Visual Studio 2015.
 
-The sdks which contain the words, preview4 or rc3, have removed project.json and replaced with .csproj format. You would currently get this SDK if you installed VS 2017 RC.
+The sdks which contain the words, preview4 or rc3, have removed project.json and replaced with .csproj format. You would currently get this SDK if you installed Visual Studio 2017 Release Candidate.
 
 The SDKs are not compatible, the ones that use project.json have no idea how to build dotnet new projects with .csproj files and vice-versa. You can check which version of the SDK you are using by running the following command in the directory where your project is:
 ```
 dotnet --info
 ```
 
-The two SDKs being incompatible also means a project created in VS 2015 will prompt you to be upgraded in VS 2017 RC. A project created in VS 2017 RC cannot be opened in VS 2015.
+The two SDKs being incompatible also means a project created in Visual Studio 2015 will prompt you to be upgraded in Visual Studio 2017 final. A project created in Visual Studio 2017 final cannot be opened in Visual Studio 2015.
 
-project.json is being removed and replaced with .csproj. If you download the .NET Core 1.0.3 you will end up using project.json. So, how will migration happen? The new SDKs that use .csproj add a new command to the dotnet command-line called dotnet migrate. This command will automatically upgrade a project.json into a .csproj file.
+project.json is deprecated, no longer supported and replaced with .csproj. So, how can you migrate? You can either open a project.json file in Visual Studio 2017 and it will auto-convert or you can use the command-line, specifically the dotnet migrate command.
 
 When you utilize the dotnet command-line by default you will use the latest SDK on your system, e.g. the latest version in your C:\Program Files\dotnet\sdk\ folder. If you want to control which version of the SDK that is used, simply create a global.json file, similiar to this:
 ```
 {
   "sdk": {
-    "version": "1.0.0-preview2-003156"
+    "version": "1.0.1"
   }
 }
 ```

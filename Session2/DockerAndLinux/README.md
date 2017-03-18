@@ -5,7 +5,7 @@ I demo'd Ubuntu 16.04 and RedHat 7.2 using Hyper-V.
 
 If you want a guided installation, create a RedHat developer account (free) and they will guide you through configuring the virtualization technology and installing RedHat. RedHat is an official partner of Microsoft.
 
-Once you have Linux configured and running with internet access in a VM. You can go to http://dot.net/ and follow instructions to install .NET Core on Linux, there are instructions for RedHat and Ubuntu and for different versions of .NET Core. I installed the 1.0.3 version of .NET Core.
+Once you have Linux configured and running with internet access in a VM. You can go to http://dot.net/ and follow instructions to install .NET Core on Linux, there are instructions for RedHat and Ubuntu and for different versions of .NET Core.
 
 I also installed VS code, https://code.visualstudio.com/ clicking on the appropriate Linux package.
 
@@ -18,9 +18,9 @@ dotnet restore
 dotnet run
 ```
 
-This should create Program.cs and project.json and run it (if .NET Core 1.0.3 was installed)
+This should create Program.cs and ConsoleTest.csproj and run it. (if .NET Core was installed)
 
-You can then open the folder with project.json in Visual Studio Code using:
+You can then open the folder with ConsoleTest.csproj in Visual Studio Code using:
 
 ```
 code .
@@ -49,14 +49,14 @@ You should see Hello from Docker in the output, it will take a few minutes the f
 
 ## Creating our first .NET Core container on Linux
 
-In the HelloWorldDotNet folder, I've already created a new .NET Core Console application using *dotnet new*, so we have Program.cs and project.json.
+In the HelloWorldDotNet folder, I've already created a new .NET Core Console application using *dotnet new*, so we have Program.cs and HelloWorldDotNet.csproj.
 
 We want to create a docker image that contains this program and then once we've built the image, we want to run it.
 
 To create the image, we need a Dockerfile, so we create it with the following contents:
 
 ```
-FROM microsoft/dotnet:1.0-sdk-projectjson
+FROM microsoft/dotnet:1.0-sdk
 WORKDIR /app
 
 COPY . .
@@ -65,7 +65,7 @@ RUN dotnet restore
 CMD dotnet run
 ```
 
-The first line is the image that we are basing our image on. The one I've chosen has the .NET Core SDK installed, the version that uses project.json and the 1.0 series of the .NET runtime. This image is based on another image, e.g. a Debian Linux variant. As you can see the image we are using is provided and supported by Microsoft. You can find a whole range of .NET Core Docker images on Docker Hub: https://hub.docker.com/r/microsoft/dotnet/ And more images for other Microsoft stacks at: https://hub.docker.com/u/microsoft/
+The first line is the image that we are basing our image on. The one I've chosen has the .NET Core SDK installed and the 1.0 series of the .NET runtime. This image is based on another image, e.g. a Debian Linux variant. As you can see the image we are using is provided and supported by Microsoft. You can find a whole range of .NET Core Docker images on Docker Hub: https://hub.docker.com/r/microsoft/dotnet/ And more images for other Microsoft stacks at: https://hub.docker.com/u/microsoft/
 
 The later lines copy the contents of our current directory into the image. Once copied we then run *dotnet restore* and *dotnet run* inside the image.
 
